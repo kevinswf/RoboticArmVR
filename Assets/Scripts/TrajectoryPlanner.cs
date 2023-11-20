@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Linq;
 using RosMessageTypes.Geometry;
@@ -6,6 +5,7 @@ using RosMessageTypes.NiryoMoveit;
 using Unity.Robotics.ROSTCPConnector;
 using Unity.Robotics.ROSTCPConnector.ROSGeometry;
 using UnityEngine;
+using TMPro;
 
 public class TrajectoryPlanner : MonoBehaviour
 {
@@ -28,6 +28,9 @@ public class TrajectoryPlanner : MonoBehaviour
     [SerializeField]
     GameObject m_TargetPlacement;
     public GameObject TargetPlacement { get => m_TargetPlacement; set => m_TargetPlacement = value; }
+
+    // UI
+    [SerializeField] TextMeshProUGUI _rosStatusText;
 
     // Assures that the gripper is always positioned above the m_Target cube before grasping.
     readonly Quaternion m_PickOrientation = Quaternion.Euler(90, 90, 0);
@@ -148,12 +151,12 @@ public class TrajectoryPlanner : MonoBehaviour
     {
         if (response.trajectories.Length > 0)
         {
-            Debug.Log("Trajectory returned.");
+            _rosStatusText.text = "Robot trajectory calculated, executing movement...";
             StartCoroutine(ExecuteTrajectories(response));
         }
         else
         {
-            Debug.LogError("No trajectory returned from MoverService.");
+            _rosStatusText.text = "No valid trajectory calculated. Please try a different location.";
         }
     }
 
@@ -205,6 +208,8 @@ public class TrajectoryPlanner : MonoBehaviour
 
             // All trajectories have been executed, open the gripper to place the target cube
             OpenGripper();
+
+            _rosStatusText.text = "Trial completed, awaiting next trial.";
         }
     }
 
